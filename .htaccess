@@ -1,0 +1,37 @@
+# Reglas para Hostinger (LiteSpeed/Apache). El deploy lo copia a public_html.
+# Ojo: la carpeta del subdominio de WordPress (public_html/tienda) está dentro y hereda lo que
+# no sea reescritura; por eso aquí no hay reglas de caché para HTML generado por PHP ni para /wp-json/.
+
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # Un solo dominio: www.midominio.com → midominio.com (301). Así el carrito (CORS) funciona
+  # y Google no ve dos copias del sitio. Para forzar https usar el interruptor de hPanel.
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/javascript application/xml image/svg+xml model/gltf-binary
+</IfModule>
+
+AddType application/manifest+json .webmanifest
+# Personas 3D de la tienda (modelos glTF binarios): tipo correcto y comprimidos al enviarlos.
+AddType model/gltf-binary .glb
+
+<IfModule mod_headers.c>
+  # Las páginas se revisan en cada visita (así un deploy se ve enseguida)…
+  <FilesMatch "(\.(html|xml|txt|webmanifest)|^sw\.js)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+  # Logos, favicon e íconos de la app no cambian casi nunca: el navegador los guarda un día y la
+  # CDN de Hostinger no tiene que pedírselos al servidor en cada visita.
+  <FilesMatch "\.(svg|png|jpe?g|webp|ico|woff2?)$">
+    Header set Cache-Control "public, max-age=86400"
+  </FilesMatch>
+  # Modelos 3D (personas): pesan varios MB y no cambian; se guardan una semana.
+  <FilesMatch "\.glb$">
+    Header set Cache-Control "public, max-age=604800"
+  </FilesMatch>
+</IfModule>

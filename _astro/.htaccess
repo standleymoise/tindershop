@@ -1,0 +1,5 @@
+# …y lo de /_astro/ (JS, CSS, fuentes, fotos optimizadas) lleva un nombre que cambia con cada
+# versión, así que el navegador puede guardarlo un año sin preguntar.
+<IfModule mod_headers.c>
+  Header set Cache-Control "public, max-age=31536000, immutable"
+</IfModule>

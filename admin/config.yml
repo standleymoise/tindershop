@@ -1,0 +1,74 @@
+# Panel de contenido del sitio CK Oído (Sveltia CMS, formato compatible con Decap CMS).
+# Al guardar, el panel hace un commit en GitHub y el workflow vuelve a publicar el sitio (~1-2 min).
+
+backend:
+  name: github
+  repo: standleymoise/tindershop
+  branch: main
+  # Solo token: GitHub Pages no tiene servidor OAuth para «Iniciar sesión con GitHub».
+  auth_methods: [token]
+  commit_messages:
+    create: 'Blog: crear «{{slug}}»'
+    update: 'Blog: actualizar «{{slug}}»'
+    delete: 'Blog: borrar «{{slug}}»'
+    uploadMedia: 'Blog: subir imagen «{{path}}»'
+    deleteMedia: 'Blog: borrar imagen «{{path}}»'
+
+site_url: https://standleymoise.github.io/tindershop/
+display_url: https://standleymoise.github.io/tindershop/
+logo:
+  src: /tindershop/favicon.svg
+
+# Carpeta global de medios (solo para colecciones futuras; el blog define la suya abajo).
+media_folder: public/img/cms
+public_folder: /img/cms
+
+output:
+  omit_empty_optional_fields: true
+
+collections:
+  - name: blog
+    label: Blog
+    label_singular: Artículo
+    description: Artículos del blog de CK Oído. Al guardar, el sitio se vuelve a publicar en 1-2 minutos.
+    folder: src/content/blog
+    extension: md
+    format: frontmatter
+    create: true
+    slug: '{{slug}}'
+    # Las imágenes se guardan en src/assets/blog y se referencian relativas al artículo,
+    # para que Astro las optimice con image() (igual que los artículos existentes).
+    media_folder: ../../assets/blog
+    public_folder: ../../assets/blog
+    summary: '{{title}} — {{date}}'
+    sortable_fields:
+      fields: [date, title]
+      default:
+        field: date
+        direction: descending
+    # Ruta absoluta: el sitio vive en /tindershop (GitHub Pages).
+    preview_path: /tindershop/blog/{{slug}}/
+    fields:
+      - name: title
+        label: Título
+        widget: string
+      - name: date
+        label: Fecha de publicación
+        widget: datetime
+        time_format: false
+        format: YYYY-MM-DD
+      - name: excerpt
+        label: Resumen
+        widget: text
+        hint: Se muestra en las tarjetas del blog (1-2 líneas).
+      - name: image
+        label: Imagen principal
+        widget: image
+        hint: Foto horizontal, idealmente de 1200 px de ancho o más. Mejor subirla que pegar un enlace externo (si el sitio externo la borra, desaparece).
+      - name: imageAlt
+        label: Descripción de la imagen
+        widget: string
+        hint: Qué se ve en la foto (para accesibilidad y Google).
+      - name: body
+        label: Contenido
+        widget: markdown
